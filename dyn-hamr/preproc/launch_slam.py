@@ -150,9 +150,10 @@ def launch_job(gpus, cmd):
     print(cur_proc.name, cur_proc._identity)
     worker_id = cur_proc._identity[0] - 1
     gpu = gpus[worker_id % len(gpus)]
-    cmd = f"CUDA_VISIBLE_DEVICES={gpu} {cmd}"
-    print(cmd)
-    subprocess.call(cmd, shell=True)
+    env = os.environ.copy()
+    env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    print(f"CUDA_VISIBLE_DEVICES={gpu} {cmd}")
+    subprocess.call(cmd, shell=True, env=env)
 
 
 if __name__ == "__main__":

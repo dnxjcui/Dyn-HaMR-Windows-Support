@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(conda list:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(conda run:*)",
+      "Bash(gh api:*)",
+      "Bash(conda info:*)",
+      "Bash(nvidia-smi:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(find:*)",
+      "Bash(conda rename:*)",
+      "Bash(conda create:*)",
+      "Bash(\"C:\\\\Users\\\\cuiln\\\\Desktop\\\\rewind\\\\Dyn-HaMR\\\\scripts\\\\setup_env.bat\" status)",
+      "Bash(\"C:\\\\Users\\\\cuiln\\\\Desktop\\\\rewind\\\\Dyn-HaMR\\\\scripts\\\\setup_env.bat\" test)"
+    ]
+  }
+}

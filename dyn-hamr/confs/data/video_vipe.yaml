@@ -1,6 +1,6 @@
 type: video
 split: custom
-root: /data/home/zy3023/code/hand/Dyn-HaMR/test  # put your videos in root/videos/vid.mp4
+root: C:/Users/cuiln/Desktop/rewind/Dyn-HaMR/test  # put your videos in root/videos/vid.mp4
 video_dir: videos
 seq: prod1
 ext: mp4
@@ -25,5 +25,5 @@ sources:
 
 # VIPE-specific options
 use_vipe: True
-vipe_dir: /data/home/zy3023/code/hand/Dyn-HaMR/third-party/vipe/vipe_results
+vipe_dir: C:/Users/cuiln/Desktop/rewind/Dyn-HaMR/third-party/vipe/vipe_results
 

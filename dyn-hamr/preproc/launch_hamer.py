@@ -7,7 +7,7 @@ from preproc.datasets import update_args
 from preproc.export_hamer import export_sequence_results
 
 ROOT_DIR = os.path.abspath(f"{__file__}/../../../")
-SRC_DIR = os.path.join(ROOT_DIR, "third-party/hamer")
+SRC_DIR = os.path.join(ROOT_DIR, "third-party", "hamer")
 
 def launch_hamer(gpus, seq, img_dir, res_dir, name, datatype, overwrite=False):
     """
@@ -15,29 +15,27 @@ def launch_hamer(gpus, seq, img_dir, res_dir, name, datatype, overwrite=False):
     """
     cur_proc = mp.current_process()
     print("PROCESS", cur_proc.name, cur_proc._identity)
-    # 1-indexed processes
-    # worker_id = cur_proc._identity[0] - 1 if len(cur_proc._identity) > 0 else 0
-    # gpu = gpus[worker_id % len(gpus)]
     gpu = gpus[0]
 
     HAMER_DIR = SRC_DIR
     print("HAMER DIR", HAMER_DIR)
 
-    cmd_args = [
-        f"cd {HAMER_DIR};",
-        f"CUDA_VISIBLE_DEVICES={gpu}",
-        "python -u run.py",
-        f"--img_folder {img_dir} ",
-        f"--res_folder {res_dir}/demo_{name}.pkl ",
-        f"--batch_size=48 --side_view --save_mesh --full_frame",
-        f"--type {datatype}",
-        f"--checkpoint {ROOT_DIR}",
-        "--render"
+    # Set GPU via environment variable (cross-platform)
+    env = os.environ.copy()
+    env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+
+    cmd = [
+        "python", "-u", "run.py",
+        "--img_folder", img_dir,
+        "--res_folder", os.path.join(res_dir, f"demo_{name}.pkl"),
+        "--batch_size=48", "--side_view", "--save_mesh", "--full_frame",
+        "--type", datatype,
+        "--checkpoint", ROOT_DIR,
+        "--render",
     ]
 
-    cmd = " ".join(cmd_args)
-    print(cmd)
-    return subprocess.call(cmd, shell=True)
+    print(f"Running HaMeR in {HAMER_DIR}: {' '.join(cmd)}")
+    return subprocess.call(cmd, cwd=HAMER_DIR, env=env)
 
 
 def process_seq(
@@ -55,20 +53,21 @@ def process_seq(
     Run and export HAMER results
     """
     name = os.path.basename(seq)
-    res_root = f"{out_root}/{out_name}/{seq}"
+    res_root = os.path.join(out_root, out_name, seq)
     os.makedirs(res_root, exist_ok=True)
     res_dir = os.path.join(res_root, "results")
-    res_path = f"{res_root}/{name}.pkl"
+    res_path = os.path.join(res_root, f"{name}.pkl")
 
     if overwrite or not os.path.isfile(res_path):
         res = launch_hamer(gpus, seq, img_dir, res_dir, name, datatype, overwrite)
-        print(f'rename {res_dir}/demo_{name}.pkl into ', res_path)
-        os.rename(f"{res_dir}/demo_{name}.pkl", res_path)
+        src_pkl = os.path.join(res_dir, f"demo_{name}.pkl")
+        print(f'rename {src_pkl} into ', res_path)
+        os.rename(src_pkl, res_path)
         assert res == 0, "HAMER FAILED"
 
     # export the HAMER predictions
-    track_dir = f"{out_root}/{track_name}/{seq}"
-    shot_path = f"{out_root}/{shot_name}/{seq}.json"
+    track_dir = os.path.join(out_root, track_name, seq)
+    shot_path = os.path.join(out_root, shot_name, f"{seq}.json")
 
     export_sequence_results(res_path, track_dir, shot_path)
     return 0

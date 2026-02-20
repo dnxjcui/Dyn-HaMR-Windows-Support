@@ -588,7 +588,7 @@ def blend_keypoints(source_path1, source_path2, target_path, gt_frames=None, raw
     
        
     if not blend_vid_out_path is None and render:
-        os.system(f"/usr/bin/ffmpeg -y -framerate 30 -i {blend_vid_out_path}/%04d.jpg -vcodec libx264 -pix_fmt yuv420p {blend_vid_out_path}.mp4")  
+        os.system(f"ffmpeg -y -framerate 30 -i {blend_vid_out_path}/%04d.jpg -vcodec libx264 -pix_fmt yuv420p {blend_vid_out_path}.mp4")
     
     return
 

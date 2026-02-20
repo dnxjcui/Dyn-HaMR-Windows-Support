@@ -153,36 +153,37 @@ def save_vipe_cameras_as_droid(output_dir, w2c, intrins_full):
 
 def run_vipe(video_path, vipe_dir, vipe_root):
     """
-    Run VIPE camera estimation on a video
-    
+    Run VIPE camera estimation on a video.
+    Uses 'conda run' for cross-environment invocation (works on both Linux and Windows).
+
     Args:
         video_path: Path to input video
         vipe_dir: Directory where VIPE results will be saved
         vipe_root: Root directory of VIPE installation
-    
+
     Returns:
         0 if successful, non-zero otherwise
     """
     print(f"Running VIPE on {video_path}")
     print(f"VIPE root: {vipe_root}")
     print(f"Results will be saved to: {vipe_dir}")
-    
-    # Build VIPE command with proper conda activation
-    # We need to source conda.sh first to make conda activate work in subprocess
-    conda_sh = os.path.expanduser("~/miniconda3/etc/profile.d/conda.sh")
-    if not os.path.exists(conda_sh):
-        conda_sh = os.path.expanduser("~/anaconda3/etc/profile.d/conda.sh")
-    
-    cmd = f"source {conda_sh} && conda activate vipe && cd {vipe_root} && vipe infer {video_path}"
-    
-    print(f"Executing: {cmd}")
-    out = subprocess.call(cmd, shell=True, executable="/bin/bash")
-    
+
+    # Use conda run for cross-platform cross-environment execution
+    cmd = ["conda", "run", "-n", "vipe", "--cwd", vipe_root,
+           "vipe", "infer", video_path]
+
+    print(f"Executing: {' '.join(cmd)}")
+    out = subprocess.call(cmd)
+
     if out != 0:
         print(f"WARNING: VIPE failed with exit code {out}")
+        print(f"You can also run VIPE manually in a separate terminal:")
+        print(f"  conda activate vipe")
+        print(f"  cd {vipe_root}")
+        print(f"  vipe infer {video_path}")
     else:
-        print(f"✓ VIPE completed successfully")
-    
+        print(f"VIPE completed successfully")
+
     return out
 
 
@@ -282,6 +283,8 @@ def preprocess_cameras(cfg, overwrite=False):
         overwrite=overwrite,
     )
     print(cmd)
-    gpu = os.environ.get("CUDA_VISIBLE_DEVICES", 0)
-    out = subprocess.call(f"CUDA_VISIBLE_DEVICES={gpu} {cmd}", shell=True)
+    gpu = os.environ.get("CUDA_VISIBLE_DEVICES", "0")
+    env = os.environ.copy()
+    env["CUDA_VISIBLE_DEVICES"] = str(gpu)
+    out = subprocess.call(cmd, shell=True, env=env)
     assert out == 0, "SLAM FAILED"

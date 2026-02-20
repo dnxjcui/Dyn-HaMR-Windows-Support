@@ -1,4 +1,5 @@
 import os
+import sys
 import imageio
 import numpy as np
 
@@ -6,7 +7,9 @@ import time
 import torch
 import trimesh
 
-os.environ["PYOPENGL_PLATFORM"] = "egl"
+# EGL is for headless Linux rendering; on Windows use the default WGL platform
+if sys.platform != "win32":
+    os.environ["PYOPENGL_PLATFORM"] = "egl"
 
 import pyrender
 from pyrender.constants import RenderFlags

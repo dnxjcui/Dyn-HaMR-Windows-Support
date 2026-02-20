@@ -1,6 +1,7 @@
 import argparse
 import imageio
 import os
+import shutil
 import subprocess
 
 
@@ -53,7 +54,7 @@ def split_frame(videopath,
     elif os.path.isdir(videopath):
         print()
         print('moving ', base_name , 'to ', out_dir)
-        os.system(f"cp -r {videopath} {out_dir}")
+        shutil.copytree(videopath, out_dir, dirs_exist_ok=True)
         raise ValueError
         return 0
     
@@ -100,7 +101,7 @@ def video_to_frames(
         cmd = f"ffmpeg -i {path} {arg_str} {out_dir}/%06d.{ext} {yn}"
         print(cmd)
     elif os.path.isdir(base_name):
-        os.system(f"cp -r {base_name} {out_dir}")
+        shutil.copytree(base_name, out_dir, dirs_exist_ok=True)
         return 0
     else:
         print(path, os.path.exists(path))
