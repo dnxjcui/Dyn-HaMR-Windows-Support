@@ -60,10 +60,10 @@ def process_seq(
 
     if overwrite or not os.path.isfile(res_path):
         res = launch_hamer(gpus, seq, img_dir, res_dir, name, datatype, overwrite)
+        assert res == 0, "HAMER FAILED"
         src_pkl = os.path.join(res_dir, f"demo_{name}.pkl")
         print(f'rename {src_pkl} into ', res_path)
         os.rename(src_pkl, res_path)
-        assert res == 0, "HAMER FAILED"
 
     # export the HAMER predictions
     track_dir = os.path.join(out_root, track_name, seq)
